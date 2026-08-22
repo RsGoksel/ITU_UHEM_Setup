@@ -1,0 +1,10 @@
+# Kimlik / sir dosyalari - ASLA commit edilmez
+*.ovpn
+creds.txt
+*credentials*
+*.key
+*.pem
+id_rsa*
+id_ed25519*
+.env
+*.secret
