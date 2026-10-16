@@ -1,94 +1,57 @@
-# 02 — Slurm ile İş Gönderme
+# Slurm ile iş gönderme
 
-UHeM'de iş çalıştırmanın **tek yolu kuyruk sistemidir (Slurm)**. Login node'da
-doğrudan program çalıştırmak yasaktır (bkz. Önemli Notlar).
+Önce projelerim -l ve scontrol show partition çıktısından proje kodunuzu ve kuyruk erişimini doğrulayın. Aşağıdaki PROJE_KODU yer tutucusunu kendi onaylı hesabınızla değiştirin.
 
-## İki yol
+## Ön kontrol ve batch işi
 
-| Yol | Ne zaman |
-|-----|----------|
-| **`sbatch betik.sh`** | Toplu/uzun işler — script yaz, kuyruğa at, sonucu dosyaya al |
-| **`salloc` / `srun`** | İnteraktif çalışma — makine iste, üstünde elle komut çalıştır |
+Bu depodaki examples dizinini UHEM'e aktardıktan sonra:
 
-## A) sbatch — betikle iş gönderme
+~~~bash
+sbatch --test-only --account=PROJE_KODU examples/cpu-check.sbatch
+sbatch --test-only --account=PROJE_KODU examples/gpu-check.sbatch
+~~~
 
-En basit CPU betiği (`is.sh`):
+--test-only isteği sınar ve tahminî başlama bilgisi verebilir; **iş göndermez ve uygulamayı çalıştırmaz**. Daha sonra gerçek kısa CPU tanısı istenirse:
 
-```bash
-#!/bin/bash
-#SBATCH -J denemem              # işin adı
-#SBATCH -A nakane               # PROJE adı (account) — kendi projeni yaz!
-#SBATCH -p defq                 # kuyruk
-#SBATCH -N 1                    # sunucu (node) sayısı
-#SBATCH -n 8                    # çekirdek (işlemci) sayısı
-#SBATCH --time=01:00:00         # süre limiti (SS:DD:SS veya G-SS:DD:SS)
-#SBATCH -o cikti_%j.log         # stdout (%j = job id)
-#SBATCH -e hata_%j.log          # stderr
+~~~bash
+sbatch --account=PROJE_KODU examples/cpu-check.sbatch
+squeue -u "$USER"
+~~~
 
-module load ANACONDA/Anaconda3-2024.06-1-python-3.12
-python3 programim.py
-```
+Çıktı cpu-check-IS_NUMARASI.log dosyasına gider. Örnek CPU betiği bir tam CPU düğümü ister; 128 görev rezervasyonu Python kodunu kendiliğinden 128 kopya çalıştırmaz. Kaynak eşlemesini gerçek programınıza göre düzenleyin; MPI süreçlerini srun ile başlatın.
 
-Gönder / izle / iptal:
+## İnteraktif kullanım: salloc ardından srun
 
-```bash
-sbatch is.sh          # işi teslim et → "Submitted batch job <JOBID>"
-isler                 # işlerini gör (veya: squeue -u $USER)
-isler <JOBID>         # o işin node yük/hafıza durumu
-scancel -v <JOBID>    # işi iptal et
-```
+~~~bash
+salloc --account=PROJE_KODU --partition=a100q --nodes=1 --ntasks=64 --gres=gpu:1 --time=00:10:00
+# Allocation granted mesajından sonra hâlâ login kabuğunda olabilirsiniz:
+srun --ntasks=1 --pty bash -i
+hostname
+echo "$SLURM_JOB_ID"
+nvidia-smi
+# Hesap düğümündeki işiniz bittiğinde:
+exit
+# salloc kabuğunu da kapatıp tahsisi bırakın:
+exit
+~~~
 
-### Sık kullanılan #SBATCH satırları
+salloc kaynak ayırır; srun uygulamayı hesap düğümünde başlatır. Bekleyen tahsiste hiçbir eğitim komutu çalıştırmayın. İnteraktif kabuk boş beklerken de tahsis kaynak tüketebilir. Tek komut alternatifi salloc [kaynak seçenekleri] srun --ntasks=1 --pty bash -i biçimindedir.
 
-| Satır | Anlamı |
-|-------|--------|
-| `-J ad` | iş adı |
-| `-A nakane` | **proje adı** (yanlışsa iş reddedilir) |
-| `-p defq` | kuyruk |
-| `-N 1` | node sayısı |
-| `-n 8` | toplam çekirdek |
-| `--ntasks-per-node=` | node başına görev |
-| `--cpus-per-task=` | görev başına çekirdek (thread) |
-| `--gres=gpu:1` | GPU iste (GPU kuyruklarında) |
-| `--time=1-00:00:00` | 1 gün |
-| `--mem=32G` | bellek (opsiyonel) |
-| `-o / -e` | çıktı/hata dosyaları |
-| `--mail-type=END --mail-user=...` | bitince mail |
+## Görev ve çekirdek farklıdır
 
-## B) salloc / srun — interaktif
+- --nodes: düğüm sayısı.
+- --ntasks: süreç/görev sayısı; paralelliği uygulamanın başlatılma biçimi belirler.
+- --cpus-per-task: her görevin kullanacağı CPU sayısı.
+- --gres=gpu:1: uygun kuyrukta bir GPU talebi.
 
-```bash
-salloc -A nakane -p gpu2dq -N 1 -n 16 --gres=gpu:1 --time=02:00:00
-# node ayrılınca o node'a düşersin (ya da: srun --pty bash)
-# artık ağır komutları BURADA çalıştırabilirsin
-module load cuda/cuda-11.7-a100q
-python3 train.py
-exit          # bitince ayrılan kaynağı bırak
-```
+Uygulamaya göre tek süreç/çok iş parçacığı veya çok süreç tasarımı seçin. Bir CPU talebini azaltmanın tam düğüm ücretlendirmesini azaltacağı varsayılmamalıdır. Örnekler 16 Ekim'deki canlı Slurm yapılandırmasında ön kontrolden geçirilmiştir; gelecekteki kabul için yeniden sınayın.
 
-> İnteraktif oturumu açık unutma — ayrılan kaynak (ve GPU faturalaması) sen `exit`
-> yapana kadar devam eder.
+## Durum, iptal ve hata
 
-## Kuyruk seçimi (Altay)
+~~~bash
+squeue -u "$USER"
+sacct -j IS_NUMARASI --format=JobID,State,ExitCode,Elapsed,AllocCPUS,NodeList
+scancel IS_NUMARASI
+~~~
 
-| Kuyruk | Kaynak | Süre | Not |
-|--------|--------|------|-----|
-| `defq` | CPU | 10 gün | varsayılan |
-| `cpu2dq` | CPU | 2 gün | kısa CPU |
-| `bigjobq` | CPU çok-node | 3 gün | büyük paralel |
-| `longq` | CPU | 21 gün | çok uzun |
-| `gpu2dq` | 1×A100 | 2 gün | **kısa GPU / test** |
-| `a100q` | 1×A100 | 10 gün | uzun tek-GPU |
-| `a100x4q` | 4×A100 NVLink | 10 gün | çok-GPU |
-| `mi210q` | AMD MI210 | — | AMD GPU |
-
-GPU işleri için detay + faturalama → `03_GPU_Isleri.md`.
-
-## Faydalı kontroller
-
-```bash
-spart               # kuyruk doluluğu + boş çekirdek
-projelerim -l       # kota (CpuSaat, disk)
-kullanim-istatigi   # son 1 ay iş istatistiğin
-sacct -j <JOBID>    # bitmiş işin özeti (süre, durum, exit code)
-```
+scancel yalnızca belirttiğiniz işi iptal etmelidir. TimeLimit, out-of-memory, ortam hatası ve iptali ayırın; başarısız işler de kaynak tüketmiş olabilir. Yeniden başlatılabilir checkpoint ve deney kaydı hazırlayın. [Slurm salloc](https://slurm.schedmd.com/salloc.html), [sbatch](https://slurm.schedmd.com/sbatch.html).

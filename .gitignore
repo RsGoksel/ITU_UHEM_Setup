@@ -8,3 +8,13 @@ id_rsa*
 id_ed25519*
 .env
 *.secret
+.local/
+__pycache__/
+*.pyc
+.venv/
+auth.txt
+known_hosts*
+*.log
+slurm-*.out
+audit-local*.json
+client.conf

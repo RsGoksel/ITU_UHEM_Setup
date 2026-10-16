@@ -1,88 +1,50 @@
-# 02 — VPN Kurulumu ve SSH ile Giriş
+# İlk VPN ve SSH bağlantısı
 
-HPC hesap mailin geldiyse (kullanıcı adı + şifre) buradan devam et.
-UHeM'e erişim **iki katmanlıdır**: önce VPN ile ağa gir, sonra SSH ile sunucuya bağlan.
+UHEM'in hesabınıza gönderdiği güncel yönergeler ve VPN profili esastır. Portal, VPN ve SSH kimliklerinin aynı olduğunu varsaymayın; size verilen bilgileri ayrı doğrulayın.
 
-> **Kimlik:** VPN ve SSH **aynı** kullanıcı adı/şifreyi kullanır (örn. `<KULLANICI>`).
-> `yazilimlar` kullanıcısı sadece VPN dosyasını indirmek içindir, bağlantıda kullanılmaz.
+## VPN
 
----
+1. İşletim sisteminize uygun OpenVPN istemcisini güvenilir kaynaktan kurun.
+2. UHEM'in verdiği kişisel profili içe aktarın. Profil sertifika/özel anahtar içerebilir; paylaşmayın, Git'e koymayın.
+3. Gerekiyorsa hesabınıza ait VPN kimliğini girin. Profildeki TLS sertifika ve sunucu doğrulamasını kapatmayın.
+4. Bağlantı sonrasında Altay'a erişimi sınayın. İstemcinin yeşil görünmesi tek başına SSH hesabınızın çalıştığını kanıtlamaz.
 
-## A) OpenVPN kurulumu (Windows)
+Linux ve systemd destekli WSL için [isteğe bağlı köprü rehberi](../../UHEM_OpenVPN.md) vardır. Zaten çalışan VPN'iniz varsa doğrudan SSH ile devam edin.
 
-Merkez, eski Cisco yerine **OpenVPN** öneriyor (daha hızlı, sorunsuz).
+## SSH ve sunucu kimliği
 
-1. **OpenVPN istemcisini indir:** https://openvpn.net/community-downloads/ → Windows 64-bit MSI.
-   Kurulumda yönetici izni + sanal ağ adaptörü onayı ister → hepsine **evet**.
-2. **Config dosyasını al:** `openvpn-uhem-config.ovpn`
-   (bu kitte `Referans/` veya masaüstünde mevcut; ya da VPN indirme sayfasından
-   `yazilimlar` / şifresi ile).
-3. Görev çubuğu sağ altında **OpenVPN ikonu** çıkar (pencere açmaz, bu normaldir).
-   İkona **sağ tık → Import file** → `openvpn-uhem-config.ovpn`'i seç.
-4. **Bağlan:** ikona sağ tık → **Connect** → **HPC kullanıcı adı + şifre**.
-   İkon **yeşile** dönerse tünel kalkmış demektir.
+~~~bash
+ssh KULLANICI_ADI@altay.uhem.itu.edu.tr
+~~~
 
-> **Linux için:** `openvpn-uhem-config-linux.ovpn` kullanılır (içinde
-> `up/down /etc/openvpn/update-resolv-conf` satırları farklı). Paket
-> yöneticisinden `openvpn` kurup `sudo openvpn --config openvpn-uhem-config-linux.ovpn`.
+İlk bağlantıda görünen sunucu anahtarı parmak izini UHEM'in güvenilir kanalından teyit edin. Körlemesine yes vermeyin; ssh-keyscan yalnızca anahtarı toplar, kimliği doğrulamaz. Teyit edilmiş anahtar kaydedildikten sonra otomatik araçlar StrictHostKeyChecking=yes kullanır ve bilinmeyen anahtarı kabul etmez.
 
-### VPN bağlantısını DOĞRULA (önemli)
+Parola yerine size tanımlanmış SSH anahtarı varsa özel dosyayı koruyun:
 
-İkonun yeşil olması **tek başına yeterli kanıt değildir** — VPN bazen "bağlandım"
-der ama ağ yönlendirmesini kuramaz. Kesin test:
+~~~bash
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/uhem
+ssh -i ~/.ssh/uhem KULLANICI_ADI@altay.uhem.itu.edu.tr
+~~~
 
-- Tarayıcıda **http://sari.uhem.itu.edu.tr** (ya da `sariyer.uhem.itu.edu.tr`)
-  aç. Pembe zeminli UHeM sayfası + güncellenen saat gelirse tünel gerçekten çalışıyor.
-- Bu adresler dışarıdan (VPN'siz) DNS'te **hiç çözülmez**; açılıyorsa iş tamamdır.
+Mevcut anahtarın üzerine yeni anahtar üretmeyin. Başarılı girişten sonra:
 
----
+~~~bash
+hostname
+whoami
+~~~
 
-## B) SSH ile sunucuya bağlan
+Bu çıktı kimliği doğrulanmış oturumu gösterir. Permission denied başarısız kimlik doğrulamasıdır; başarılı giriş sayılmaz.
 
-Windows 10/11'de OpenSSH **hazır kuruludur**, PuTTY şart değil (video PuTTY anlatır
-ama gerek yok). PowerShell veya CMD'de:
+## Sorunu ayırın
 
-```bash
-ssh <KULLANICI>@altay.uhem.itu.edu.tr
-```
+| Belirti | Önce bakılacak |
+|---|---|
+| DNS hatası | VPN iç DNS'i, profilin verdiği adresler |
+| Connection timed out | VPN rotası, hesaplanan hedef IP ve SSH erişimi |
+| Permission denied | Kullanıcı adı, parola/anahtar, hesap etkinliği |
+| Host key changed | İşlemi durdurup UHEM'e yeni parmak izini teyit ettirin |
+| Portal açılıyor ama SSH açılmıyor | Portal hesabıyla hesaplama hesabı ayrı etkinleşebilir |
+| KEX/aktarım takılıyor | Profil, yol MTU'su ve ağ; [tanı adımları](../../UHEM_OpenVPN.md) |
 
-- **İlk bağlantıda** host key sorar → `yes`.
-- Şifre sorulunca HPC şifreni gir (ekranda görünmez, normaldir).
-
-### Sunucular
-
-| Adres | Ne |
-|-------|-----|
-| `altay.uhem.itu.edu.tr` | **Altay** login node (güncel, aktif küme) |
-| `sariyer.uhem.itu.edu.tr` | Sarıyer login node — **KAPANDI**, artık kullanılmaz |
-
-> Not: Sarıyer verileri Altay'da `/SARIYER` altında salt-okunur duruyor (bkz. Önemli Notlar).
-
----
-
-## Şifre reddi mi alıyorsun? ("Permission denied")
-
-Yeni açılan hesaplarda sık görülür. Sırayla:
-
-1. **VPN çalışıyor ama SSH reddediyor** → hesabın küme tarafında henüz
-   **aktifleşmemiş** olabilir (LDAP/home dizini yayılması birkaç saat sürebilir).
-   Bu geçicidir; birkaç saat sonra kendiliğinden düzelir.
-2. **Üst üste deneme yapma** — 5-10 başarısız denemede fail2ban IP/hesabı geçici
-   kilitleyebilir. Aralıklı, birer kez dene.
-3. **Kopyala-yapıştır tuzağı:** Şifreyi önce **formatsız bir editöre** (Not Defteri)
-   yapıştır, sonunda görünmez boşluk olmadığından emin ol, oradan kopyala — ya da
-   **elle** gir. Kaynak mailin HTML biçimi bazen sona boşluk ekliyor.
-4. Bir gün içinde düzelmezse **destek@uhem.itu.edu.tr**'ye yaz:
-   "VPN çalışıyor, sariyer/altay SSH parola doğrulaması reddediliyor, hesabın
-   aktifleştirilmesi gerekiyor olabilir." (Aynı projede birden çok kişi aynı
-   durumdaysa bunu belirt — sistem tarafı sorunu olduğunu kanıtlar.)
-
----
-
-## İlk giriş sonrası hemen
-
-```bash
-passwd        # şifreni değiştir (özellikle mail/sohbetle paylaşıldıysa)
-```
-
-Sonra → `03_Giris_Sonrasi_Kontrol.md`.
+Yanlış parolayı döngüyle denemeyin; kilitlenme eşikleri/süresi bu rehberde doğrulanmadı. Destek isterken saat, hata türü ve istemci sürümünü paylaşın; parola, tam profil, anahtar veya tokenlı URL paylaşmayın.

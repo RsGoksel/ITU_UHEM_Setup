@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "audited_on": "2026-10-16",
+  "timezone": "Europe/Istanbul",
+  "baseline_commit": "7acbde9714b9682d7cf88e61551ef251f3b7020c",
+  "scope": "Access/setup repository; no scientific production",
+  "local_tests": {
+    "command": "python3 -m unittest discover -s tests -v",
+    "passed": 23,
+    "failed": 0
+  },
+  "shell_syntax": {
+    "files": [
+      "scripts/uhem-proxy.sh",
+      "scripts/install-local-tools.sh",
+      "examples/cpu-check.sbatch",
+      "examples/gpu-check.sbatch"
+    ],
+    "status": "PASS"
+  },
+  "systemd_template_verify": "PASS",
+  "installed_tool": "~/.local/bin/uhem-check",
+  "live_read_only_audit": {
+    "status": "PASS",
+    "required_checks": [
+      "project",
+      "partitions",
+      "nodes",
+      "my_jobs",
+      "modules"
+    ],
+    "personal_output_published": false
+  },
+  "new_proxy_authenticated_login": true,
+  "protected_config_files_unchanged": true,
+  "default_route_unchanged": true,
+  "interfaces_unchanged": true,
+  "slurm": {
+    "version": "20.11.8",
+    "mode": "sbatch --test-only",
+    "checks": {
+      "cpu-check.sbatch": {
+        "returncode": 0
+      },
+      "gpu-check.sbatch": {
+        "returncode": 0
+      }
+    },
+    "jobs_before": 0,
+    "jobs_after": 0,
+    "jobs_submitted": 0,
+    "compute_application_executed": false
+  },
+  "known_failure_and_fix": "First proxy live test failed: nc inherited DNS here-string instead of SSH stdin; moved exec outside read loop, added regression test, live SSH passed.",
+  "not_verified": [
+    "Fresh VPN profile deployment",
+    "Non-root systemd authorization",
+    "Windows/WSL network combinations",
+    "GH200 account access",
+    "MI210 GPU count",
+    "gpu2dq/MI210 billing multipliers",
+    "Actual CPU/GPU application execution"
+  ],
+  "live_captured_at": "2026-10-16T21:54:06.424977+03:00",
+  "status": "PASS"
+}

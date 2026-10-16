@@ -1,71 +1,32 @@
-# 01 — Modül Ortamı (Lmod)
+# Modüller ve Python ortamları
 
-UHeM'de derleyiciler ve programlar **modül** sistemiyle yüklenir. PATH'i kendin
-kurcalamak yerine ilgili modülü yüklersin.
+UHEM oturumunda hafif keşif:
 
-## Temel komutlar
+~~~bash
+bash -lc 'module -t avail'
+~~~
 
-```bash
-module avail                 # kurulu tüm modüller
-mav <arama>                  # module avail'in grep'lenebilir/aranabilir hâli
-module load <MODUL>          # modül yükle
-ml <MODUL>                   # module load kısayolu (parametresiz: module list)
-module list                  # yüklü modüllerin
-module unload <MODUL>        # modülü kaldır
-module show <MODUL>          # modülün ne yaptığını gör (PATH, değişkenler)
-module purge                 # tüm yüklü modülleri temizle
-```
+Giriş kabuğunda module tanımlıysa doğrudan module avail, module list ve module show MODUL_ADI kullanabilirsiniz. Modül adını listeden alın; bu rehber sabit bir CUDA/GROMACS sürümünün gelecekte bulunacağını garanti etmez.
 
-> `(D)` işareti = o ailenin **varsayılan** (default) sürümü; sadece aile adını
-> yazarsan o gelir.
+## Var olan ortamı koruyun
 
-## DL/Python için önemli modüller (Altay, 2026-08)
+Bir uygulamanın mevcut Python yolu biliniyorsa yeniden ortam kurmadan sürümleri okuyun:
 
-Altay'da hazır bir "PyTorch" modülü **yoktur**; DL kullanıcıları genelde
-**Anaconda + kendi conda env** yolunu izler ve CUDA'yı modülden alır.
+~~~bash
+/ORTAMIN/TAM/YOLU/bin/python -c 'import sys; print(sys.executable); print(sys.version)'
+~~~
 
-```bash
-# Anaconda (Python 3.12 varsayılan)
-module load ANACONDA/Anaconda3-2024.06-1-python-3.12
+Başkalarının veya tamamlanmış deneylerin ortamını güncellemeyin. Yeni bağımlılıklar için kullanıcı alanında ayrı ortam ve sabit sürüm/lock dosyası kullanın. Python venv mevcutsa etkinleştirmek yerine tam yolu kullanmak yanlış Python seçimini azaltır. Conda kullanılıyorsa kurulu Conda'nın başlatma yordamını izleyin; source activate ORTAM her kabukta çalışmaz.
 
-# CUDA (GPU işleri için — gpu.sh örneğindeki isim)
-module load cuda/cuda-11.7-a100q
-# güncel CUDA'lar için: mav cuda
-```
+## PyTorch ve CUDA
 
-Kendi ortamını kur (bir kez):
+PyTorch'un hazır CUDA paketleri çoğunlukla CUDA çalışma zamanı bağımlılıklarıyla gelir. Sistemde yüklü toolkit ile paket etiketinin birebir eşit olması genel şart değildir; NVIDIA sürücüsü ve paket uyumluluğunu kontrol edin. Özel CUDA uzantısı derliyorsanız toolkit/derleyici uyumluluğu ayrıca gerekir. [PyTorch kurulum seçicisi](https://pytorch.org/get-started/locally/) ve [CUDA uyumluluk belgesi](https://docs.nvidia.com/deploy/cuda-compatibility/) esas alınmalıdır.
 
-```bash
-module load ANACONDA/Anaconda3-2024.06-1-python-3.12
-conda create -n nano python=3.11 -y
-conda activate nano
-pip install torch --index-url https://download.pytorch.org/whl/cu118   # CUDA sürümüne uygun wheel
-pip install numpy pandas scikit-learn ...     # projenin gereksinimleri
-```
+GPU görüldüğünü login düğümünden çıkarımlamayın. Hesap düğümünde, ayrılmış Slurm işi içinde:
 
-> conda env'ler ev dizininde (`/ari/users/$USER`) oluşur ve **proje disk kotasına**
-> yazılır. Büyük env'ler kotayı yer; `conda clean -a` ile ara ara temizle.
+~~~bash
+nvidia-smi
+/ORTAMIN/TAM/YOLU/bin/python -c 'import torch; print(torch.__version__, torch.version.cuda); print(torch.cuda.is_available())'
+~~~
 
-## Diğer öne çıkan modül aileleri
-
-- **Derleyiciler:** `LLVM` (clang), `AOCC` (AMD), GCC tabanlı MPI modülleri
-- **MPI:** `MPI/openmpi-*`, `MPI/mpich-*` (a100q/a100x4q için cuda'lı sürümler var)
-- **Matematik:** `AOCL`, `OpenBLAS`, `FFTW`, `BOOST`
-- **Uygulamalar:** `GROMACS`, `LAMMPS`, `NAMD`, `ANSYS`/`Fluent`, `MATLAB`, `CASTEP`, `Julia`
-- **NVIDIA HPC SDK:** `NVIDIA/nvidia-hpc-sdk-a100q`
-
-Tam liste her zaman `module avail` ile güncel görülür.
-
-## Hazır Slurm iş betikleri
-
-Merkez, yaygın programlar için örnek betikler koymuş:
-
-```bash
-ls /ari/progs/slurm_betikleri/
-```
-
-İçinde: `gpu.sh`, `gpu-multiGPU.sh`, `gpu-multinode.sh`,
-`bir_sunucuda_birden_cok_is.sh`, `YEREL-disk-kullanimi-*.sh`,
-`gaussian.sh`, `lammps_*`, `NAMD_*`, `qe-*`, `siesta-*`, `matlab.sh`, `fluent-*` ...
-
-Kendi işin için bunları kopyalayıp uyarla (bkz. `03_GPU_Isleri.md`).
+Depodaki GPU tanı betiğine UHEM_PYTHON olarak mevcut ortamın tam yolu verilebilir; hiçbir paket kurmaz. Bu revizyonda büyük bir Python/GPU ortamı yeniden kurulmadı.

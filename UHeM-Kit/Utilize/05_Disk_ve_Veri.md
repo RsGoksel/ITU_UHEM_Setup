@@ -1,67 +1,34 @@
-# 05 — Disk, Veri ve Kota Yönetimi
+# Disk, aktarım ve yedek
 
-## Dosya sistemleri (Altay)
+Önce proje kotası:
 
-| Yol | Ne | Özellik |
-|-----|-----|---------|
-| `/ari` | Ana paylaşımlı disk (beegfs) | Tüm node'lardan görünür. Ev dizinin burada: `/ari/users/$USER` |
-| `/ari/progs` | Modüller, hazır betikler | Salt-okunur (sistem) |
-| `/SARIYER` | Eski Sarıyer/Okyanus verisi | **Salt-okunur**, 31.08.2026'a kadar |
-| `/YEREL` | Yerel scratch disk | **Sadece** a100q (8.8TB) ve a100x4q (12TB) node'larında, node'a özel |
+~~~bash
+/ari/progs/uhem-bin/projelerim -l
+du -sh KENDI_CALISMA_DIZINIM
+df -h .
+~~~
 
-## Kota
+projelerim proje limiti/kullanımını; du belirttiğiniz dosyaları; df tüm dosya sistemini gösterir. Bu üç değer aynı şeyi ölçmez. Kota bildirimi yaklaşık 2 saat geriden gelebilir.
 
-- Kota **projeye** bağlıdır, kullanıcıya değil. Tüm proje kullanıcıları aynı
-  CpuSaat + disk havuzunu paylaşır.
-- Ev dizini kişisel kotası "unlimited" görünebilir; **bağlayıcı olan proje disk
-  kotasıdır** (örn. nakane: 1.124 GB).
-- Kontrol:
+## Güvenli aktarım
 
-```bash
-projelerim -l                            # CpuSaat + disk % (2 saat gecikmeli)
-beegfs-ctl --getquota --uid $USER        # anlık kişisel beegfs kullanımı
-du -sh ~/*                               # neyin ne kadar yer kapladığı
-```
+Yerelde, dosya yollarını kendi dizinlerinizle değiştirin:
 
-## Dosyanın hangi projeye sayıldığını değiştirme
+~~~bash
+rsync -av --partial --info=progress2 ./yerel-calisma/ UHEM_Nanoparticle:~/calisma/
+rsync -av --partial --info=progress2 UHEM_Nanoparticle:~/calisma/ ./yedek/
+~~~
 
-Yeni oluşan tüm dosyalar **öntanımlı projene** (örn. nakane) sayılır. Farklı bir
-projeye geçirmek için:
+İlk aktarımda --delete kullanmayın; kaynak/hedef sonundaki eğik çizginin içeriği nasıl etkilediğini kontrol edin. Büyük arşivler için önce boyut ve boş alan hesaplayın. Kaynak veriyle sonuçları ayrı tutun; ham veri üzerine yazmayın.
 
-```bash
-degistir <PROJE> <DIZIN>
-```
+Kritik dosya için iki uçta sha256sum DOSYA çalıştırıp eşleştirin. Aktarım tamamlandı mesajı tek başına uygulamanın doğru veriyi kullandığını kanıtlamaz. Kısmi dosyaları tamamlanmış sonuç sanmayın.
 
-## Sarıyer verisi taşıma (2026 geçişi — 31.08.2026 son tarih)
+## Scratch ve kalıcı kayıt
 
-Sarıyer kümesi kapandı; verilerin Altay'da `/SARIYER` altında salt-okunur.
+Düğümün yerel diski ile paylaşılan dosya sistemi farklıdır. Scratch yolunu kümenin güncel yönergesinden öğrenin; eski Sarıyer/RunSpace temizleme sürelerini Altay BeeGFS'e aynen taşımayın. Düğüm kapanışı veya temizlik işinde veri kaybını önlemek için sonuçları tahsis bitmeden proje dizinine, sonra dış yedeğe taşıyın.
 
-```bash
-ls -la /SARIYER/users/$USER              # veri var mı?
-# varsa /ari altına kopyala:
-cp -a /SARIYER/users/$USER/onemli_klasor /ari/users/$USER/
-# veya seçili büyük veriyi rsync ile:
-rsync -ah --info=progress2 /SARIYER/users/$USER/veri/ /ari/users/$USER/veri/
-```
+UHEM'in yedekleme garantisi varsayılmamalıdır; öğrenci politikası yedeği kullanıcıya bırakır. [Öğrenci politikası](https://portal.uhem.itu.edu.tr/studentterms.php). Proje sonu saklama ve silme takvimini güncel hesap koşulundan teyit edin.
 
-> Büyük kopyalama login node'u yorabilir → gerekiyorsa `salloc` ile bir node alıp
-> orada kopyala.
+## Deney kaydı
 
-## ⚠️ Yedekleme YOK
-
-UHeM disk sistemleri **yedeklenmez**. Kritik verini (kod, sonuç, işlenmiş veri
-seti) mutlaka **UHeM dışında** da yedekle:
-
-```bash
-# örnek: sonuçları kendi makinene çek (kendi bilgisayarından çalıştır, VPN açıkken)
-scp -r <KULLANICI>@altay.uhem.itu.edu.tr:/ari/users/<KULLANICI>/sonuclar ./yedek/
-# veya rsync
-rsync -ah <KULLANICI>@altay.uhem.itu.edu.tr:/ari/users/<KULLANICI>/sonuclar/ ./yedek/sonuclar/
-```
-
-## Disk kotası dolarsa
-
-- `du -sh ~/*` ile en büyük klasörleri bul.
-- conda env'leri şişer → `conda clean -a`, kullanılmayan env'leri `conda env remove -n <ad>`.
-- Ara çıktıları/checkpoint'leri temizle veya dışarı taşı.
-- Geçici/scratch veriyi iş sırasında `/YEREL`'e yaz, `/ari`'yi doldurma.
+Her koşu için Git commit'i, veri sürümü/hash'i, ortam sürümleri, Slurm iş numarası, kuyruk, düğüm/GPU, kaynak talebi, başlangıç/bitiş, rastgele tohum, hata ve çıktı hash'lerini kaydedin. Başarısız denemeler de kayda girmelidir. Tek klasöre kontrolsüz tüm ortamı, cache'i ve büyük ara dosyaları yedeklemek yerine yeniden üretim için gerekli girdileri belirleyin.

@@ -1,0 +1,10 @@
+# Edit user and installed proxy path. Obtain server fingerprint from UHEM first.
+Host UHEM_Nanoparticle
+    HostName altay.uhem.itu.edu.tr
+    User YOUR_UHEM_USER
+    Port 22
+    ProxyCommand /absolute/path/to/ITU_UHEM_Setup/scripts/uhem-proxy.sh %h %p
+    StrictHostKeyChecking yes
+    ConnectTimeout 30
+    ServerAliveInterval 30
+    ServerAliveCountMax 3

@@ -1,92 +1,14 @@
-# ⚠️ ÖNCE BUNU OKU — Kritik Notlar
+# Başlamadan önce
 
-UHeM kullanmadan önce bilinmesi gereken, çoğu "sonradan öğrenilen" ve pahalıya
-mal olabilen noktalar. Tek sayfada.
+1. **Hesaplama Slurm üzerinden yapılır.** Login düğümünde eğitim/simülasyon başlatmayın; salloc sonrası srun ile hesap düğümüne geçin.
+2. **Kota çekirdek-saat olarak izlenir.** Düğümün tüm işlemcileri kullanılmış gibi faturalandırılır; uygulamanın az çekirdek kullanması mutlaka tasarruf sağlamaz.
+3. **A100 katsayıları farklıdır.** 16 Ekim 2026 canlı bildirimi: a100q 2×, a100x4q 4×. 64 çekirdekli bir düğüm için bir saat sırasıyla 128 ve 256 kota birimi. gpu2dq/MI210 katsayısı bu incelemede doğrulanmadı.
+4. **Bir düğümün GPU sayısına bakın.** a100x4q dört A100 içerir; kodunuz tek GPU kullanıyorsa kalanları otomatik kullanmaz.
+5. **Kuyruklar örtüşebilir.** gpu2dq, a100q ile aynı düğüm havuzunu paylaşır; ayrı 30 GPU daha varmış gibi toplamayın.
+6. **Zaman ve kaynak ayrı sınırlardır.** Proje son tarihi, kredi, disk ve kuyruk çalışma süresi farklı kontrollerdir. Aylık otomatik kredi yenilemesi varsaymayın.
+7. **Öğrenci ve öğretim üyesi desteği farklıdır.** Öğrenciye ücretsiz 400.000 verilmez; [başvuru koşullarına](../Setup_Login/01_Kayit.md) bakın.
+8. **Düğümler paylaşılan hizmettir.** Başka projeyi ancak o projeye uygun tahsis ve yürütücü onayıyla çalıştırın; mevcut projenin kaynaklarını otomatik devretmeyin.
+9. **Yedek kullanıcı sorumluluğundadır.** Genel dosya sistemi boşluğu sizin disk kotanız değildir; scratch kalıcı arşiv değildir.
+10. **Bağlantı dosyaları kişiseldir.** VPN/SSH ayarlarını düzeltirken başka VPN'leri, varsayılan rotayı veya doğrulanmış sunucu anahtarlarını topluca silmeyin.
 
----
-
-## 1. Login node'da ağır iş ÇALIŞTIRMA
-
-`altay` login node'u sadece **iş göndermek** içindir. Orada doğrudan eğitim/derleme/
-büyük kopyalama başlatırsan, çok CPU/RAM tüketince **otomatik öldürülür**.
-
-✅ Doğru: `sbatch betik.sh` ile kuyruğa ver, ya da `salloc`/`srun` ile node alıp orada çalış.
-
----
-
-## 2. GPU faturalama tuzağı (kotayı en hızlı yiyen şey)
-
-GPU işinde **sunucunun TÜM çekirdekleri** kullanılmış sayılır ve çarpılır:
-
-- `a100q` → harcanan çekirdek-saatin **×2**'si CpuSaat düşülür
-- `a100x4q` → **×4**
-
-4×A100'lü node'da birkaç günlük iş ~400k'lik havuzu hızla eritir.
-**Tek GPU yetiyorsa `gpu2dq`/`a100q` kullan; `a100x4q`'ya sadece gerçek multi-GPU'da geç.**
-GPU boş beklerken geçen saat de faturalanır → GPU'yu dolu tut (batch/worker ayarı).
-
----
-
-## 3. Yedekleme YOK
-
-UHeM diskleri yedeklenmez. Kritik veri/kod/sonucu **UHeM dışında da** yedekle
-(scp/rsync ile kendi makinene). Disk arızası = veri gider.
-
----
-
-## 4. Kota PROJEYE ait, kişisel değil
-
-Tüm proje kullanıcıları aynı CpuSaat + disk havuzunu paylaşır (nakane: ~396k CpuSaat,
-1.124 GB disk, 8 kullanıcı). Sen çok harcarsan ekibe kalan azalır. `projelerim -l` ile takip et.
-
----
-
-## 5. Sarıyer verisi 31.08.2026'da silinecek
-
-Sarıyer kümesi kapandı. Eski verilerin Altay'da `/SARIYER` altında **salt-okunur**.
-İçinde işine yarar veri varsa **31 Ağustos 2026'a kadar** `/ari`'ye kopyala:
-`ls /SARIYER/users/$USER` ile kontrol et. (Yeni kullanıcıysan muhtemelen boş.)
-
----
-
-## 6. Şifre yönetimi
-
-- HPC kullanıcı adı/şifresi **hem VPN hem SSH** için aynıdır.
-- İlk girişte `passwd` ile değiştir (mail/mesajla paylaşıldıysa mutlaka).
-- Kopyala-yapıştırda **sona görünmez boşluk** takılabilir → Not Defteri'ne yapıştırıp
-  temizle veya elle gir. ("Permission denied" alıyorsan ilk şüphelenilecek şey.)
-
----
-
-## 7. VPN "yeşil" ≠ bağlı
-
-OpenVPN ikonu yeşil olsa da yönlendirme kurulmamış olabilir. Kesin test:
-tarayıcıda **http://sari.uhem.itu.edu.tr** açılıyorsa tünel gerçekten çalışıyor.
-
----
-
-## 8. Yeni hesap "Permission denied" verirse panik yok
-
-VPN çalışıp SSH reddediyorsa hesap küme tarafında **henüz aktifleşmemiş** olabilir
-(birkaç saat). Üst üste deneme yapma (fail2ban kilitler), aralıklı dene; sürerse
-`destek@uhem.itu.edu.tr`.
-
----
-
-## 9. Maildeki `portal.uybhm...` linki ölü
-
-Eski alan adının DNS'i yok. `uybhm` → `uhem` yaz: `portal.uhem.itu.edu.tr`.
-
----
-
-## 10. Atıf (yayın/bildiri zorunluluğu)
-
-UHeM kaynağı kullanan her yayında atıf gerekir + sonucu portala eklemelisin:
-
-> Computing resources used in this work were provided by the National Center for
-> High Performance Computing of Turkey (UHeM) under grant number **1022642025**.
-
-Türkçe:
-
-> Bu çalışmada kullanılan hesaplama kaynakları Ulusal Yüksek Başarımlı Hesaplama
-> Merkezi'nin (UHeM), **1022642025** numaralı desteğiyle sağlanmıştır.
+Kaynaklar: [kullanım türleri](https://uhem.itu.edu.tr/kullanim/kullanim-turleri), projelerim -l ve [denetim kaydı](../../AUDIT_2026-10-16.md).

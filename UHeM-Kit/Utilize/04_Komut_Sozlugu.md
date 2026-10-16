@@ -1,73 +1,25 @@
-# 04 — Komut Sözlüğü
+# Komut sözlüğü
 
-UHeM'in kendi kısayol komutları (`/ari/progs/uhem-bin/`) + standart Slurm/modül
-komutları. Kümede `komutlar` yazınca bu özetin bir kısmına ulaşılır.
+| Amaç | Komut |
+|---|---|
+| Giriş | ssh UHEM_Nanoparticle |
+| Kimlik | hostname ; whoami |
+| Proje, kredi, disk, tarih | /ari/progs/uhem-bin/projelerim -l |
+| Kuyruk özeti | sinfo -o "%P %a %l %D %t %G" |
+| Kuyruk ayrıntısı | scontrol show partition a100q |
+| Düğüm/GPU eşlemesi | sinfo -N -h -o "%N %P %t %c %m %G" |
+| Kendi işlerim | squeue -u "$USER" |
+| Ön kontrol, iş göndermeden | sbatch --test-only --account=PROJE_KODU DOSYA.sbatch |
+| İş gönder | sbatch --account=PROJE_KODU DOSYA.sbatch |
+| Hesap düğümünde kabuk | Kaynak ayrıldıktan sonra srun --ntasks=1 --pty bash -i |
+| Tek işi iptal | scancel IS_NUMARASI |
+| İş sonucu | sacct -j IS_NUMARASI --format=JobID,State,ExitCode,Elapsed,AllocCPUS |
+| Modüller | bash -lc 'module -t avail' |
+| Kendi dizin boyutum | du -sh KENDI_DIZINIM |
+| Genel dosya sistemi | df -h . |
+| Dosya doğrulama | sha256sum DOSYA |
+| Kullanıcı ortamı | /ORTAM/bin/python -c 'import sys; print(sys.executable)' |
 
-## UHeM'e özel komutlar
+quotas/projelerim yolları kurulumla değişebilir; bu yol 16 Ekim 2026'da Altay'da doğrulandı. quota -s bazı dosya sistemlerinde yanıt vermeyebilir ve bu denetimde kullanılmadı. Genel df boşluğu kişisel proje kotası değildir.
 
-| Komut | Ne yapar |
-|-------|----------|
-| `komutlar` | Sık kullanılan komutların özetini gösterir |
-| `spart` | Kuyrukların doluluğu, boş/toplam çekirdek, kullanıcının iş sayısı |
-| `isler` | Kullanıcının işlerini gösterir |
-| `isler <JOBID>` | O işin çalıştığı makinelerin yük/hafıza durumu |
-| `projelerim` | Projelerin özeti (durum, kullanıcılar, anlık iş limitleri) |
-| `projelerim -l` | **Detaylı**: kullanılan/toplam CpuSaat, disk GB, başlangıç-bitiş |
-| `sunucular` | Bir işe ayrılmış sunucuların adları |
-| `kullanim-istatigi` | Son 1 aylık iş istatistiğin |
-| `degistir <PROJE> <DIZIN>` | Dizini/dosyayı verilen projenin kotasına geçirir |
-| `bos_makineler` | Boş makine/kuyruk özeti (video'daki komut; `spart` benzeri) |
-
-## Slurm komutları
-
-| Komut | Ne yapar |
-|-------|----------|
-| `sbatch betik.sh` | İş betiğini kuyruğa teslim eder |
-| `salloc ...` | İnteraktif çalışma için sunucu ayırır |
-| `srun --pty bash` | Ayrılan node'da interaktif kabuk |
-| `scancel -v <JOBID>` | İşi iptal eder |
-| `squeue -u $USER` | Kuyruktaki/çalışan işlerin (isler'e benzer) |
-| `sacct -j <JOBID>` | Bitmiş işin özeti (süre, durum, exit code) |
-| `sinfo` | Kuyruk/node durumu (ham) |
-| `scontrol show job <JOBID>` | İşin tüm detayları |
-
-## Modül komutları
-
-| Komut | Ne yapar |
-|-------|----------|
-| `module avail` | Kurulu modüller |
-| `mav <arama>` | Aranabilir/grep'lenebilir module avail |
-| `module load <M>` / `ml <M>` | Modül yükle |
-| `module list` / `ml` | Yüklü modüller |
-| `module unload <M>` | Modülü kaldır |
-| `module show <M>` | Modülün içeriği |
-| `module purge` | Tümünü temizle |
-
-## Dizin / disk
-
-| Komut | Ne yapar |
-|-------|----------|
-| `pwd` | Bulunduğun dizin (`/ari/users/$USER`) |
-| `quota -s` | (varsa) disk kotası |
-| `beegfs-ctl --getquota --uid $USER` | beegfs (/ari) kullanıcı kotası |
-| `du -sh <dizin>` | Dizin boyutu |
-| `ls /SARIYER/users/$USER` | Eski Sarıyer verisi (salt-okunur) |
-
-## Editör
-
-| Komut | Ne yapar |
-|-------|----------|
-| `nano <dosya>` | Basit metin editörü |
-| `vim <dosya>` | (kuruluysa) gelişmiş editör |
-
-## Hazır betikler
-
-```bash
-ls /ari/progs/slurm_betikleri/     # örnek Slurm iş betikleri
-```
-
-## Küçük hatırlatmalar
-
-- Uzun süren aktarım/derleme bile login node'da ağır ise öldürülür → `salloc` içinde yap.
-- `$USER` = kullanıcı adın, `$HOME` = `/ari/users/$USER`.
-- Ayrıntılı wiki: **http://wiki.uhem.itu.edu.tr**
+sacct çıktısında işin üst kaydı, batch/extern adımları ve job array üst kayıtlarını toplayıp tüketimi iki kez saymayın. kullanim-istatistigi gibi yardımcı özetler başarısız/kısa işleri atlayabiliyorsa resmî kota yerine kullanılamaz.

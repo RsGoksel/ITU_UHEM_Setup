@@ -1,42 +1,19 @@
-# UHeM Erişim & Kullanım Kiti
+# UHEM kullanım rehberi
 
-İTÜ Ulusal Yüksek Başarımlı Hesaplama Merkezi (UHeM, eski adıyla UYBHM) için
-sıfırdan erişim + kullanım rehberi. Yeni bir proje kullanıcısının kolayca
-başlayabilmesi ve mevcut kullanıcıların hızlı başvurabilmesi için hazırlandı.
+Altay erişimi ve Slurm kullanımı. Son kontrol: **16 Ekim 2026**. Hesap, proje kodu ve destek numarası kullanıcıya özeldir; örneklerde kendi onaylı bilgilerinizi kullanın. UHEM'in GH200 altyapısı da vardır; bu kitin canlı erişim doğrulaması Altay ile sınırlıdır.
 
-> Proje: **nakane** · Grant No: **1022642025** · Küme: **Altay**
-> (Sarıyer kümesi 2026'da kapatıldı, artık sadece Altay aktif.)
+| Başlangıç | İçerik |
+|---|---|
+| [Kayıt](Setup_Login/01_Kayit.md) | Başvuru türleri, öğrenci desteği ve yürütücü |
+| [VPN ve SSH](Setup_Login/02_Giris_VPN_SSH.md) | İlk bağlantı ve kimlik doğrulama |
+| [Giriş sonrası kontrol](Setup_Login/03_Giris_Sonrasi_Kontrol.md) | Kota, kuyruklar, kullanıcı işleri |
+| [Linux / WSL kısayolu](Setup_Login/04_SSH_Kisayolu_WSL_VPN.md) | İsteğe bağlı güvenli otomasyon |
+| [Önemli notlar](Onemli_Notlar/00_ONCE_BUNU_OKU.md) | Hesaplama, ücretlendirme, yedek |
+| [Modüller](Utilize/01_Moduller.md) | Yazılım ve Python ortamları |
+| [Slurm](Utilize/02_Slurm_Is_Gonderme.md) | Batch ve interaktif işler |
+| [GPU](Utilize/03_GPU_Isleri.md) | Kaynak seçimi, A100 / MI210 |
+| [Komut sözlüğü](Utilize/04_Komut_Sozlugu.md) | Hızlı başvuru |
+| [Disk](Utilize/05_Disk_ve_Veri.md) | Kota, aktarım, doğrulama ve yedek |
+| [Resmî kaynaklar](Referans/Wiki_Linkleri.md) | Güncellik ve kaynak önceliği |
 
-## Klasör yapısı
-
-| Klasör | İçerik |
-|--------|--------|
-| **Setup_Login/** | Sıfırdan erişim: kayıt → e-posta onayı → hesap → VPN → SSH → giriş sonrası ilk kontroller |
-| **Utilize/** | Kümeyi kullanma: modüller, Slurm iş gönderme, GPU işleri, komut sözlüğü, disk/veri |
-| **Onemli_Notlar/** | Kritik uyarılar tek sayfada (faturalama tuzağı, login node, yedek, kota) |
-| **Referans/** | Kimlik bilgileri şablonu, wiki linkleri, erişim videosu transkripti |
-
-## Nereden başlamalı
-
-1. **İlk kez mi kuruyorsun?** → `Setup_Login/01_Kayit.md` sırayla.
-2. **Hesabın var, kullanmaya mı başlıyorsun?** → `Onemli_Notlar/00_ONCE_BUNU_OKU.md`, sonra `Utilize/02_Slurm_Is_Gonderme.md`.
-3. **Bir komut mu unuttun?** → `Utilize/04_Komut_Sozlugu.md`.
-
-## Okuma sırası (yeni kullanıcı)
-
-```
-Setup_Login/01_Kayit.md
-Setup_Login/02_Giris_VPN_SSH.md
-Setup_Login/03_Giris_Sonrasi_Kontrol.md
-Onemli_Notlar/00_ONCE_BUNU_OKU.md
-Utilize/01_Moduller.md
-Utilize/02_Slurm_Is_Gonderme.md
-Utilize/03_GPU_Isleri.md
-Utilize/04_Komut_Sozlugu.md
-Utilize/05_Disk_ve_Veri.md
-```
-
----
-*Hazırlanma: 2026-08-20. Bilgiler o tarihteki Altay kümesi durumuna göredir;
-kota/kuyruk/süre limitleri zamanla değişebilir — güncel durum için
-`projelerim` ve `spart` komutlarına ve wiki.uhem.itu.edu.tr'ye bakın.*
+Çalışan SSH bağlantınız varsa [kontrol aracıyla](../scripts/uhem-check.py) başlayabilirsiniz. [Denetim kaydı](../AUDIT_2026-10-16.md), eski sürümdeki hataları ve yapılan doğrulamaları listeler.

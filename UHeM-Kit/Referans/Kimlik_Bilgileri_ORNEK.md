@@ -1,56 +1,17 @@
-# Kimlik Bilgileri (Şablon)
+# Kimlik bilgilerini yerelde tutma şablonu
 
-> ⚠️ **GÜVENLİK:** Gerçek şifreni düz metin dosyada tutma. İlk girişte `passwd`
-> ile değiştir. Bu dosya bir **şablon**; hangi bilginin nereye ait olduğunu
-> hatırlatmak içindir. Gerçek şifreyi bir parola yöneticisinde sakla.
+Bu dosyaya gerçek bilgi yazıp commit etmeyin. Kendi korumalı notunuzda aşağıdaki alanların **nerede saklandığını** kaydedin; parolayı bu tabloya koymak gerekmez.
 
-## Portal (sadece portal.uhem.itu.edu.tr için)
+| Alan | Yerel kayıtta tutulacak |
+|---|---|
+| Portal | https://portal.uhem.itu.edu.tr/ ve kayıtlı e-posta |
+| Proje | Kişisel proje kodu, yürütücü, onaylanan amaç, grant no |
+| SSH | Kendi kullanıcı adı, Host alias, özel anahtarın yolu |
+| Sunucu kimliği | UHEM'den doğrulanan SSH anahtar parmak izi ve tarih |
+| VPN | Profilin korumalı yolu, özel servis/tünel adı |
+| Kimlik deposu | Parola yöneticisi veya 0600 izinli auth dosyasının yolu |
+| Kota | Kaynak miktarı, dönem sonu ve son teyit zamanı |
 
-| Alan | Değer |
-|------|-------|
-| Giriş adresi | https://portal.uhem.itu.edu.tr/ |
-| Kullanıcı | İTÜ e-posta adresin |
-| Portal şifresi | *(ilk mailde geldi — değiştir)* |
+Örnek dosya yerleri: ~/.config/uhem/client.ovpn, ~/.config/uhem/auth.txt, ~/.ssh/uhem. Bunlar hazır sağlanmış dosyalar değildir. Kullanıcı adı/şifre, sertifika veya tokenlı indirme adresi bu depoya eklenmez.
 
-## HPC hesabı (VPN + SSH — aynı bilgi)
-
-| Alan | Değer |
-|------|-------|
-| Kullanıcı adı | `<KULLANICI>` |
-| Şifre | *(hesap mailinde geldi — `passwd` ile değiştir)* |
-| Proje adı (account) | `nakane` |
-| Grant No | `1022642025` |
-| Proje bitiş | 2026-10-07 |
-
-## Sunucular
-
-| Ne | Adres |
-|----|-------|
-| Altay login (aktif) | `altay.uhem.itu.edu.tr` |
-| Sarıyer login | KAPANDI |
-| VPN sunucu | `160.75.120.252:1194/udp` (config içinde) |
-| Doğrulama sayfası | http://sari.uhem.itu.edu.tr |
-
-## VPN dosya indirme kullanıcısı (sadece .ovpn indirmek için)
-
-| Alan | Değer |
-|------|-------|
-| VPN indirme sayfası | https://portal.uhem.itu.edu.tr/vpn-<TOKEN>/ |
-| Kullanıcı | `yazilimlar` |
-| Şifre | *(hesap mailinde)* |
-
-> Bu kullanıcı **bağlantıda kullanılmaz**, sadece config/istemci indirmek içindir.
-
-## İletişim
-
-| Konu | Adres |
-|------|-------|
-| Hesap/proje/onay | hesap@uhem.itu.edu.tr |
-| Teknik destek | destek@uhem.itu.edu.tr |
-| Genel | iletisim@uhem.itu.edu.tr |
-| Telefon/Faks | +90 212 285 70 64 |
-| Web / Wiki | http://www.uhem.itu.edu.tr · http://wiki.uhem.itu.edu.tr |
-
-## Adres
-
-İTÜ Ayazağa Yerleşkesi, Uydu Yolu, Bilişim Enstitüsü Binası, Maslak 34469, İstanbul
+auth dosyası gerekiyorsa OpenVPN biçimi kullanıcı adı ve parolanın ayrı satırlarda olmasıdır. Dosyayı parola yöneticisinden veya güvenli editörden oluşturun; komut satırına yazıp kabuk geçmişine düşürmeyin. Sistem servisi kullanılıyorsa [servis rehberindeki](../../UHEM_OpenVPN.md) root erişimli yerleşim geçerlidir.

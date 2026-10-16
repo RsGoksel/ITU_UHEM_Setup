@@ -1,84 +1,35 @@
-# 01 — Kayıt ve E-posta Onayı
+# Kayıt, destek türü ve proje üyeliği
 
-UHeM'e bireysel başvuru genelde **yürütücü (öğretim üyesi)** tarafından yapılır;
-öğrenciler/araştırmacılar mevcut bir projeye **kullanıcı olarak eklenir**.
-Bu doküman "bir projeye eklendim, hesabımı nasıl aktifleştiririm" akışını anlatır.
+**16 Ekim 2026 kontrolü.** Önce doğru başvuru türünü seçin; portal hesabı, hesaplama hesabı ve kaynak tahsisi aynı işlem değildir.
 
-## Genel akış (özet)
+## Hangi destek?
 
-```
-1. Yürütücü seni projeye kullanıcı olarak ekler
-2. Sana "e-posta onayı" maili gelir        → sen onaylarsın
-3. Portal şifresi maili gelir              → portala girebilirsin
-4. UHeM hesabını ELLE kontrol edip onaylar → bekleme burada
-5. HPC hesabı açılır: VPN + SSH kullanıcı adı/şifresi ayrı mail gelir
-6. VPN kur + SSH ile bağlan                → 02 ve 03'e geç
-```
+| Yol | Kimler / kapsam |
+|---|---|
+| Öğrenci Araştırma Desteği | Lisans 25.000; yüksek lisans 50.000; doktora 100.000 çekirdek-saat. Disk sırasıyla 25 / 50 / 100 GB. Ücretsiz, tek öğrenci projesi. |
+| Akademik Hazırlık | Üniversitede görev yapan öğretim üyelerine, belirtilen proje hazırlığı/kapanış koşullarıyla ücretsiz 400.000 çekirdek-saat. Öğrenci ve araştırma görevlisi kapsam dışı. |
+| Akademik proje | Üniversite/kamu araştırma projesi; uygun yürütücü başvurur, araştırmacı ve öğrenciler eklenebilir. Ücretli hizmet veya uygun bir destek programı ayrıca değerlendirilir. |
 
-## Adım adım
+Kaynak: [UHEM kullanım türleri](https://uhem.itu.edu.tr/kullanim/kullanim-turleri). Öğrenci portalının eski metninde 10.000 / 40.000 / 80.000 yazıyor; güncel ana site farklıdır. Başvurunuzun tahsis miktarını UHEM ile teyit edin.
 
-### 1. E-posta onay maili
+**Öğrenci desteğinde kaynak bitince ikinci öğrenci projesi açılamaz.** Portal koşulları danışmanla akademik proje başvurusunu sonraki yol olarak gösterir. Süre uzatımı ile yeni hesaplama kredisi farklı işlemlerdir; kaynak kalması koşuluyla süre uzaması, yeniden kredi verilmesi anlamına gelmez. İstisna dilekçesi kabul edileceğine ilişkin yayımlanmış garanti bulunmadı. [Öğrenci koşulları](https://portal.uhem.itu.edu.tr/studentterms.php).
 
-Konu: *"Your e-mail address has been submitted to the ... Portal"*.
-İçinde bir **onay linki** ve **onay kodu** (40 haneli hash) bulunur.
+400.000 desteğine başvuruda doktorayı bitirmiş olmak tek başına yeterli değildir. Öğretim üyesi kadrosu ve programda tanımlanan proje koşulları aranır; örneğin yeni bir TÜBİTAK/BAP başvurusu hazırlığı. Birden çok farklı akademik proje ile birden çok öğrenci projesini karıştırmayın.
 
-> ⚠️ **Alan adı tuzağı:** Maildeki link `portal.uybhm.itu.edu.tr` yazar.
-> Bu eski alan adının **DNS kaydı YOK** — tarayıcıda `DNS_PROBE...` hatası verir.
-> **Çözüm:** Host adını `uybhm` → `uhem` yap, gerisi aynı kalır:
->
-> ```
-> https://portal.uhem.itu.edu.tr/userConfirm.php?proId=<PROJE>&hashStr=<KOD>
-> ```
+## Yeni başvuru veya mevcut projeye katılma
 
-Linke tıkla **veya** `https://portal.uhem.itu.edu.tr/userConfirm.php?proId=<PROJE>`
-formundaki "Onay Kodu" kutusuna kodu yapıştır.
+1. [Resmî başvuru sürecini](https://uhem.itu.edu.tr/kullanim/kullanici-basvuru-sureci) okuyun; [portal](https://portal.uhem.itu.edu.tr/) hesabınızı açın.
+2. Projeye katılacaksanız yürütücünün kullanıcı ekleme sürecini takip edin. Yeni proje sihirbazını sırf göründüğü için göndermeyin.
+3. Portalda kayıtlı e-posta adresinizi onaylayın; bu adresin mutlaka İTÜ adresi olacağı varsayılmamalıdır.
+4. Portal erişiminin ardından hesaplama sistemi hesabının ve proje üyeliğinin etkinleştirildiğini ayrıca teyit edin.
+5. UHEM'in size verdiği kişisel VPN profilini ve hesap bilgilerini korumalı yerde saklayın; ardından [VPN ve SSH](02_Giris_VPN_SSH.md) adımına geçin.
 
-> ⚠️ **Onay kodu TEK KULLANIMLIKTIR.** Onay başarılı olduktan sonra kod tükenir.
-> Tekrar denersen *"Onay kodunuzu yanlış girdiniz"* der — bu bir **hata değildir**,
-> kodun zaten kullanıldığı anlamına gelir. Portala girebiliyorsan onay tamamdır.
+Eski alan adı veya bozuk onay bağlantısında doğrudan resmî portalı açın ve UHEM'den destek isteyin. URL içindeki kimlik/onay tokenlarını herkese açık yere yapıştırmayın. Hatalı onay kodu, kodun kesinlikle daha önce kullanıldığı anlamına gelmez.
 
-### 2. Portal şifresi
+## Akademik başvurunun dosyası
 
-Onaydan sonra *"Portal Şifreniz: ..."* maili gelir. Bu şifre **sadece portal**
-içindir; VPN/hesaplama sistemlerinde ÇALIŞMAZ.
+Kısa proje özeti, yürütücü özgeçmişi, iş planı, destekleyen kurum ve **nicel kaynak gerekçesi** hazırlayın: kaç deney, hangi düğüm/GPU, tahminî süre, toplam düğüm-saat, disk ve beklenen çıktı. Benzer projenin devamı için yeni adla başvuru yerine yenileme gerekebilir. [Başvuru esasları](https://portal.uhem.itu.edu.tr/appTerms.php) eski tarihli olduğundan güncel form ve yürütücü koşulunu UHEM'e teyit edin.
 
-- Giriş: https://portal.uhem.itu.edu.tr/ → sol üstteki kutuya **İTÜ e-posta adresin** + portal şifresi.
-- Portal hesabı hangi adrese eklendiyse o adresle girilir (genelde `@itu.edu.tr`, gmail değil).
-- İlk girişten sonra **🔑 Portal Şifrenizi Değiştirin**.
+Kaynak/süre yenilemesi için portalda ilgili projenin Proje Yenileme adımı; kaynak gerekçesi, mevcut sonuçlar ve çıktı dosyaları kullanılır. Genel yenileme ekranı öğrenci desteğinin tek proje sınırlamasını ortadan kaldırmaz. [Yenileme açıklaması](https://portal.uhem.itu.edu.tr/faq.php).
 
-### 3. Portaldaki "boş başvuru" normaldir
-
-Girişte sol menüde *"Onay Bekleyen Projeler > [Proje Başlığı Belirtilmemiş]"*
-görünür ve senden proje başlığı/özet ister. **Bu bir arıza değildir** — projesi
-olmayan her hesaba gösterilen standart "yeni başvuru sihirbazı"dır ve senin
-eklendiğin projeyle ilgisi yoktur.
-
-- **Doldurma, gönderme, SİLME.** (Sil'e basarsan kendi taslağını silersin, zararsız ama gereksiz.)
-- Tek yapman gereken: **1. İletişim ve Özlük Bilgileri**ni doldurmak (kişisel bilgin).
-- Not: Öğrenciysen bu boş başvuruyu *bilerek* doldurup göndererek "öğrencilere
-  ücretsiz 400.000 çekirdek-saat" programından ayrıca yararlanabilirsin — bu ayrı
-  bir fırsat, zorunlu değil.
-
-### 4. HPC hesabının açılması
-
-UHeM, kaydını elle kontrol edip onaylar (birkaç saat–birkaç iş günü). Sonra
-**"proje kullanıcısı hesabı onayı"** maili gelir. İçinde:
-
-- **Kullanıcı adı** (örn. `<KULLANICI>`) — VPN ve SSH için AYNI
-- **Şifre** — VPN ve SSH için AYNI
-- **Proje Adı** (örn. `nakane`) ve **Grant No**
-- VPN yazılımı indirme kullanıcısı: `yazilimlar` / (şifre mailde) — *sadece dosya indirmek için*
-
-> Bu mail geldiğinde `02_Giris_VPN_SSH.md`'ye geç.
-
-## İletişim (kayıt sorunları)
-
-| Konu | Adres |
-|------|-------|
-| Hesap/proje/onay işlemleri | **hesap@uhem.itu.edu.tr** |
-| Teknik sorunlar (SSH, iş, modül) | **destek@uhem.itu.edu.tr** |
-| Genel | iletisim@uhem.itu.edu.tr |
-| Telefon | **+90 212 285 70 64** |
-
-> İpucu: Onay/aktivasyon gecikirse **telefon**, mailden belirgin şekilde hızlıdır.
-> Ayrıca yürütücünün tek satırlık hatırlatma maili, senin üç mailinden etkilidir.
+**Yayımlanmış bir 7 gün içinde açılma garantisi bulunmadı.** Tam başvuruyla beklenen tarihi hesap@uhem.itu.edu.tr adresine sorun. Önceki rehberdeki “birkaç saat–birkaç iş günü” ifadesi taahhüt gibi kullanılmamalıdır. Resmî iletişim: +90 212 285 70 64.
